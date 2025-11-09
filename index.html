@@ -1,157 +1,121 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Distribuição de Apostas</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px;
-  }
-  h1 {
-    color: #38bdf8;
-    margin-bottom: 20px;
-  }
-  .container {
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px #0ea5e9;
-    max-width: 400px;
-    width: 100%;
-  }
-  input {
-    width: 100%;
-    padding: 10px;
-    margin: 6px 0;
-    border-radius: 6px;
-    border: none;
-    font-size: 16px;
-  }
-  button {
-    width: 100%;
-    margin: 6px 0;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    background: #38bdf8;
-    color: #000;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  button:hover {
-    background: #0ea5e9;
-  }
-  .resultado {
-    margin-top: 20px;
-    background: #0f172a;
-    padding: 10px;
-    border-radius: 8px;
-  }
-  .saldo {
-    color: #22c55e;
-    font-weight: bold;
-  }
-</style>
-</head>
-<body>
-
-<h1>Calculadora de Apostas - 2 Odds</h1>
-<div class="container">
-  <label>Odd 1:</label>
-  <input type="number" id="odd1" placeholder="Insira a odd 1">
-
-  <label>Odd 2:</label>
-  <input type="number" id="odd2" placeholder="Insira a odd 2">
-
-  <label>Saldo Inicial:</label>
-  <input type="number" id="saldoInicial" placeholder="Ex: 100" value="0">
-
-  <label>Multiplicador - 2 Vitórias:</label>
-  <input type="number" id="multVitoria" placeholder="Ex: 1.5" value="1.5">
-
-  <label>Multiplicador - 1 Vitória:</label>
-  <input type="number" id="multUma" placeholder="Ex: 1.1" value="1.1">
-
-  <label>Multiplicador - 0 Vitórias:</label>
-  <input type="number" id="multPerda" placeholder="Ex: 0.8" value="0.8">
-
-  <label>Quantas apostas erraram? (0, 1 ou 2):</label>
-  <input type="number" id="erros" placeholder="0, 1 ou 2" min="0" max="2">
-
-  <button onclick="calcular()">Calcular Resultado</button>
-  <button onclick="acumularSaldo()">Acumular Saldo Atual</button>
-  <button onclick="resetarOdds()">Resetar Odds</button>
-  <button onclick="limparCampos()">Limpar Todos os Campos</button>
-
-  <div class="resultado" id="resultado"></div>
-</div>
-
 <script>
-let saldoAtual = 0;
+  let saldoAtual = parseFloat(document.getElementById('saldoInicial').value) || 0;
+  let acumuladoTotal = 0;
+  let contadorApostas = 0; // Contador para a linha do tempo
 
-function calcular() {
-  const odd1 = parseFloat(document.getElementById('odd1').value) || 0;
-  const odd2 = parseFloat(document.getElementById('odd2').value) || 0;
-  const saldoInicial = parseFloat(document.getElementById('saldoInicial').value) || 0;
-  const multVitoria = parseFloat(document.getElementById('multVitoria').value) || 1;
-  const multUma = parseFloat(document.getElementById('multUma').value) || 1;
-  const multPerda = parseFloat(document.getElementById('multPerda').value) || 1;
-  const erros = parseInt(document.getElementById('erros').value) || 0;
+  document.getElementById('saldoAtualDisplay').textContent = formatMoney(saldoAtual);
+  document.getElementById('acumuladoDisplay').textContent = formatMoney(acumuladoTotal);
 
-  let novoSaldo = saldoInicial;
-
-  if (erros === 0) {
-    novoSaldo = saldoInicial * multVitoria;
-  } else if (erros === 1) {
-    novoSaldo = saldoInicial * multUma;
-  } else if (erros === 2) {
-    novoSaldo = saldoInicial * multPerda;
+  function formatMoney(v){
+    return 'R$ ' + Number(v || 0).toFixed(2);
   }
 
-  saldoAtual = novoSaldo;
+  function calcular(){
+    const timeCasa = document.getElementById('timeCasa').value || 'Time A';
+    const timeVis = document.getElementById('timeVisitante').value || 'Time B';
 
-  document.getElementById('resultado').innerHTML = `
-    <p>Erros: <b>${erros}</b></p>
-    <p>Multiplicador aplicado: <b>${
-      erros === 0 ? multVitoria : erros === 1 ? multUma : multPerda
-    }</b></p>
-    <p>Saldo atualizado: <span class="saldo">R$ ${novoSaldo.toFixed(2)}</span></p>
-  `;
-}
+    const odd1 = parseFloat(document.getElementById('odd1').value) || 0;
+    const odd2 = parseFloat(document.getElementById('odd2').value) || 0;
 
-function acumularSaldo() {
-  const saldoInicial = parseFloat(document.getElementById('saldoInicial').value) || 0;
-  saldoAtual += saldoInicial;
-  document.getElementById('resultado').innerHTML = `
-    <p>Saldo acumulado: <span class="saldo">R$ ${saldoAtual.toFixed(2)}</span></p>
-  `;
-}
+    const saldoInicial = parseFloat(document.getElementById('saldoInicial').value) || 0;
+    let stake = parseFloat(document.getElementById('valorAposta').value) || 0;
 
-function resetarOdds() {
-  document.getElementById('odd1').value = '';
-  document.getElementById('odd2').value = '';
-}
+    const multVitoria = parseFloat(document.getElementById('multVitoria').value) || 1;
+    const multUma = parseFloat(document.getElementById('multUma').value) || 1;
+    const multPerda = parseFloat(document.getElementById('multPerda').value) || 0;
 
-function limparCampos() {
-  document.getElementById('odd1').value = '';
-  document.getElementById('odd2').value = '';
-  document.getElementById('saldoInicial').value = 0;
-  document.getElementById('multVitoria').value = 1.5;
-  document.getElementById('multUma').value = 1.1;
-  document.getElementById('multPerda').value = 0.8;
-  document.getElementById('erros').value = '';
-  document.getElementById('resultado').innerHTML = '';
-  saldoAtual = 0;
-}
+    const erros = parseInt(document.getElementById('erros').value, 10);
+
+    if(stake > saldoInicial){
+      alert('Atenção: o valor da aposta (stake) é maior que o saldo da banca.');
+    }
+
+    let multAplicado = 1;
+    if(erros === 0) multAplicado = multVitoria;
+    else if(erros === 1) multAplicado = multUma;
+    else if(erros === 2) multAplicado = multPerda;
+
+    const retorno = stake * multAplicado;
+    const novoSaldo = (saldoInicial - stake) + retorno;
+
+    saldoAtual = novoSaldo;
+
+    // Exibir detalhes da rodada
+    const detalhesEl = document.getElementById('detalhes');
+    detalhesEl.innerHTML = `
+      <div class="line"><div><strong>Partida:</strong></div><div>${escapeHtml(timeCasa)} x ${escapeHtml(timeVis)}</div></div>
+      <div class="line"><div class="muted">Odds:</div><div>${odd1 ? odd1 : '-'} / ${odd2 ? odd2 : '-'}</div></div>
+      <div class="line"><div class="muted">Stake (valor da aposta):</div><div>${formatMoney(stake)}</div></div>
+      <div class="line"><div class="muted">Multiplicador aplicado:</div><div><strong>${multAplicado}</strong></div></div>
+      <div class="line"><div class="muted">Retorno (stake × multiplicador):</div><div><strong>${formatMoney(retorno)}</strong></div></div>
+      <div class="line"><div class="muted">Saldo anterior:</div><div>${formatMoney(saldoInicial)}</div></div>
+      <div class="line"><div class="muted">Novo saldo da banca:</div><div class="saldo">${formatMoney(novoSaldo)}</div></div>
+    `;
+
+    document.getElementById('saldoAtualDisplay').textContent = formatMoney(saldoAtual);
+
+    // Adiciona ao histórico com linha colorida
+    const tbody = document.getElementById('historicoBody');
+    contadorApostas++;
+    const tr = document.createElement('tr');
+
+    // Define cor da linha: verde = lucro, vermelho = prejuízo
+    let corLinha = retorno >= stake ? '#1f7a1f' : '#b91c1c';
+    tr.style.backgroundColor = corLinha;
+    tr.style.color = '#fff'; // Texto branco para contraste
+    tr.style.fontWeight = '600';
+
+    tr.innerHTML = `
+      <td style="padding:6px;">#${contadorApostas} - ${escapeHtml(timeCasa)} x ${escapeHtml(timeVis)}</td>
+      <td style="text-align:right; padding:6px;">${formatMoney(stake)}</td>
+      <td style="text-align:right; padding:6px;">${multAplicado}</td>
+      <td style="text-align:right; padding:6px;">${formatMoney(retorno)}</td>
+      <td style="text-align:right; padding:6px;">${formatMoney(novoSaldo)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function acumularSaldo(){
+    acumuladoTotal = (acumuladoTotal || 0) + (saldoAtual || 0);
+    document.getElementById('acumuladoDisplay').textContent = formatMoney(acumuladoTotal);
+    alert('Saldo atual acumulado no total: ' + formatMoney(acumuladoTotal));
+  }
+
+  function resetarOdds(){
+    document.getElementById('odd1').value = '';
+    document.getElementById('odd2').value = '';
+  }
+
+  function limparCampos(){
+    document.getElementById('odd1').value = '';
+    document.getElementById('odd2').value = '';
+    document.getElementById('saldoInicial').value = 0;
+    document.getElementById('valorAposta').value = 0;
+    document.getElementById('multVitoria').value = 1.5;
+    document.getElementById('multUma').value = 1.1;
+    document.getElementById('multPerda').value = 0;
+    document.getElementById('erros').value = '0';
+    document.getElementById('detalhes').innerHTML = '';
+    document.getElementById('historicoBody').innerHTML = '';
+    saldoAtual = 0;
+    acumuladoTotal = 0;
+    contadorApostas = 0;
+    document.getElementById('saldoAtualDisplay').textContent = formatMoney(saldoAtual);
+    document.getElementById('acumuladoDisplay').textContent = formatMoney(acumuladoTotal);
+  }
+
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  document.getElementById('saldoInicial').addEventListener('input', function(){
+    const v = parseFloat(this.value) || 0;
+    saldoAtual = v;
+    document.getElementById('saldoAtualDisplay').textContent = formatMoney(saldoAtual);
+  });
 </script>
-
-</body>
-</html>
