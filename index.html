@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Distribuição de Apostas</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+  }
+  h1 {
+    color: #38bdf8;
+    margin-bottom: 20px;
+  }
+  .container {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #0ea5e9;
+    max-width: 400px;
+    width: 100%;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+  }
+  button {
+    width: 100%;
+    margin: 6px 0;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #38bdf8;
+    color: #000;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  button:hover {
+    background: #0ea5e9;
+  }
+  .resultado {
+    margin-top: 20px;
+    background: #0f172a;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .saldo {
+    color: #22c55e;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Calculadora de Apostas - 2 Odds</h1>
+<div class="container">
+  <label>Odd 1:</label>
+  <input type="number" id="odd1" placeholder="Insira a odd 1">
+
+  <label>Odd 2:</label>
+  <input type="number" id="odd2" placeholder="Insira a odd 2">
+
+  <label>Saldo Inicial:</label>
+  <input type="number" id="saldoInicial" placeholder="Ex: 100" value="0">
+
+  <label>Multiplicador - 2 Vitórias:</label>
+  <input type="number" id="multVitoria" placeholder="Ex: 1.5" value="1.5">
+
+  <label>Multiplicador - 1 Vitória:</label>
+  <input type="number" id="multUma" placeholder="Ex: 1.1" value="1.1">
+
+  <label>Multiplicador - 0 Vitórias:</label>
+  <input type="number" id="multPerda" placeholder="Ex: 0.8" value="0.8">
+
+  <label>Quantas apostas erraram? (0, 1 ou 2):</label>
+  <input type="number" id="erros" placeholder="0, 1 ou 2" min="0" max="2">
+
+  <button onclick="calcular()">Calcular Resultado</button>
+  <button onclick="acumularSaldo()">Acumular Saldo Atual</button>
+  <button onclick="resetarOdds()">Resetar Odds</button>
+  <button onclick="limparCampos()">Limpar Todos os Campos</button>
+
+  <div class="resultado" id="resultado"></div>
+</div>
+
+<script>
+let saldoAtual = 0;
+
+function calcular() {
+  const odd1 = parseFloat(document.getElementById('odd1').value) || 0;
+  const odd2 = parseFloat(document.getElementById('odd2').value) || 0;
+  const saldoInicial = parseFloat(document.getElementById('saldoInicial').value) || 0;
+  const multVitoria = parseFloat(document.getElementById('multVitoria').value) || 1;
+  const multUma = parseFloat(document.getElementById('multUma').value) || 1;
+  const multPerda = parseFloat(document.getElementById('multPerda').value) || 1;
+  const erros = parseInt(document.getElementById('erros').value) || 0;
+
+  let novoSaldo = saldoInicial;
+
+  if (erros === 0) {
+    novoSaldo = saldoInicial * multVitoria;
+  } else if (erros === 1) {
+    novoSaldo = saldoInicial * multUma;
+  } else if (erros === 2) {
+    novoSaldo = saldoInicial * multPerda;
+  }
+
+  saldoAtual = novoSaldo;
+
+  document.getElementById('resultado').innerHTML = `
+    <p>Erros: <b>${erros}</b></p>
+    <p>Multiplicador aplicado: <b>${
+      erros === 0 ? multVitoria : erros === 1 ? multUma : multPerda
+    }</b></p>
+    <p>Saldo atualizado: <span class="saldo">R$ ${novoSaldo.toFixed(2)}</span></p>
+  `;
+}
+
+function acumularSaldo() {
+  const saldoInicial = parseFloat(document.getElementById('saldoInicial').value) || 0;
+  saldoAtual += saldoInicial;
+  document.getElementById('resultado').innerHTML = `
+    <p>Saldo acumulado: <span class="saldo">R$ ${saldoAtual.toFixed(2)}</span></p>
+  `;
+}
+
+function resetarOdds() {
+  document.getElementById('odd1').value = '';
+  document.getElementById('odd2').value = '';
+}
+
+function limparCampos() {
+  document.getElementById('odd1').value = '';
+  document.getElementById('odd2').value = '';
+  document.getElementById('saldoInicial').value = 0;
+  document.getElementById('multVitoria').value = 1.5;
+  document.getElementById('multUma').value = 1.1;
+  document.getElementById('multPerda').value = 0.8;
+  document.getElementById('erros').value = '';
+  document.getElementById('resultado').innerHTML = '';
+  saldoAtual = 0;
+}
+</script>
+
+</body>
+</html>
